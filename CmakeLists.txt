@@ -1,0 +1,36 @@
+cmake_minimum_required (VERSION 2.8.12)
+
+set(GUROBI_ROOT "/Library/gurobi903/mac64")
+
+# On créé une variable stockant le dossier où se situent les fichiers en-tête du solveur GUROBI (pour la compilation)
+set(GUROBI_INCLUDE_DIR "${GUROBI_ROOT}/include")
+message(STATUS "GUROBI_INCLUDE_DIR : ${GUROBI_INCLUDE_DIR}") # On affiche le dossier précédent (pour DEBUG)
+
+# On créé des variables stockant l'emplacement des biblothèques/librairies du solveur GUROBI (pour l'édition des liens)
+set(GUROBI_LIBRARY_CPLUS "${GUROBI_ROOT}/lib/libgurobi_c++.a")
+# ATTENTION -> Selon la version utilisée, il faut modifier le nom de la librairie ci-dessous
+set(GUROBI_LIBRARY "${GUROBI_ROOT}/lib/libgurobi90.dylib")
+set(GUROBI_LIBRARIES ${GUROBI_LIBRARY_CPLUS} ${GUROBI_LIBRARY})
+message(STATUS "GUROBI_LIBRARIES : ${GUROBI_LIBRARIES}") # On affiche les chemins vers les biblothèques (pour DEBUG)
+
+#------------------- PARTIE PRINCIPALE -----------------------
+# Notre projet est étiqueté tp1
+project (tp1)
+
+# On indique où trouver les définitions des fonctions du solveur GUROBI
+include_directories(${GUROBI_INCLUDE_DIR})
+
+# On cherche tous les fichiers .cpp et .hpp dans le dossier src (stockage dans la variable SRCS)
+file(GLOB_RECURSE SRCS src/*.cpp src/*.hpp)
+message(STATUS "SRCS : ${SRCS}") #On affiche les fichiers trouvés
+
+# On indique que l'on veut un exécutable "gurobiSolverTSP" compilé à partir des fichiers dans la variable SRCS
+add_executable(gurobiSolverTSP ${SRCS})
+
+# On indique où trouver les biblothèques du solveur GUROBI
+target_link_libraries(gurobiSolverTSP ${GUROBI_LIBRARIES})
+
+# On ajoute un lien symbolique vers le dossier data dans le dossier où se situera l'exécutable
+# (cela permet d'indiquer le chemin d'une instance contenu dans le dossier data en indiquant simplement un chemin relatif et non absolu)
+# Décommenter la ligne ci-dessous si vous avez un dossier data à la racine de votre projet
+execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/TSP_data/ ${CMAKE_CURRENT_BINARY_DIR}/TSP_data)
