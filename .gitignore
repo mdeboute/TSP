@@ -1,5 +1,6 @@
 # Build
 build/
+out/
 
 # Prerequisites
 *.d
@@ -36,3 +37,4 @@ build/
 
 # VSCODE IDE directory
 .vscode/
+.vs/
