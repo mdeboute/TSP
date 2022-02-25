@@ -3,13 +3,13 @@
 using namespace std;
 
 int main(int argc,
-    char* argv[])
+         char *argv[])
 {
     // parse and save the data
-    vector<vector<int> > c = parse("./TSP_data/ftv33.dat");
+    vector<vector<int> > c = parse(argv[1]);
     int n = c.size();
 
-    GRBVar*** x = nullptr;
+    GRBVar ***x = nullptr;
     try
     {
         // --- Creation of the Gurobi environment ---
@@ -25,13 +25,16 @@ int main(int argc,
         // --- Creation of the variables ---
         cout << "--> Creating the variables" << endl;
 
-        x = new GRBVar * *[n];
+        x = new GRBVar **[n];
 
-        for (size_t j = 0; j < n; ++j) {
-            x[j] = new GRBVar * [n];
-            for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j)
+        {
+            x[j] = new GRBVar *[n];
+            for (size_t i = 0; i < n; ++i)
+            {
                 x[j][i] = new GRBVar[n];
-                for (size_t k = 0; k < n; ++k) {
+                for (size_t k = 0; k < n; ++k)
+                {
                     stringstream ss;
                     ss << "x(" << i << "," << j << "," << k << ")";
                     x[j][i][k] = model.addVar(0.0, 1.0, 0.0, GRB_BINARY, ss.str());
@@ -39,13 +42,15 @@ int main(int argc,
             }
         }
 
-
         // --- Creation of the objective function ---
         cout << "--> Creating the objective function" << endl;
         GRBLinExpr obj = 0;
-        for (size_t i = 0; i < n; ++i) {
-            for (size_t j = 0; j < n; ++j) {
-                for (size_t k = 0; k < n; ++k) {
+        for (size_t i = 0; i < n; ++i)
+        {
+            for (size_t j = 0; j < n; ++j)
+            {
+                for (size_t k = 0; k < n; ++k)
+                {
                     if (i != j)
                         obj += c[j][i] * x[j][i][k];
                 }
@@ -59,23 +64,27 @@ int main(int argc,
         // Le sommet 0 est le seul pris en position 0
         GRBLinExpr arcDeb1 = 0;
         GRBLinExpr arcDeb2 = 0;
-        for (size_t j = 1; j < n; ++j) {
+        for (size_t j = 1; j < n; ++j)
+        {
             arcDeb1 += x[j][0][0];
-            for (size_t i = 1; i < n; ++i) {
+            for (size_t i = 1; i < n; ++i)
+            {
                 arcDeb2 += x[j][i][0];
             }
         }
         model.addConstr(arcDeb1 == 1);
         model.addConstr(arcDeb2 == 0);
 
-
-
         // Respect 1 flot à tout niveau k
-        for (size_t k = 0; k < n; ++k) {
+        for (size_t k = 0; k < n; ++k)
+        {
             GRBLinExpr flot = 0;
-            for (size_t j = 0; j < n; ++j) {
-                for (size_t i = 0; i < n; ++i) {
-                    if (i != j) {
+            for (size_t j = 0; j < n; ++j)
+            {
+                for (size_t i = 0; i < n; ++i)
+                {
+                    if (i != j)
+                    {
                         flot += x[i][j][k];
                     }
                 }
@@ -85,14 +94,17 @@ int main(int argc,
             model.addConstr(flot == 1, ss.str());
         }
 
-        
         // Respect flot à tout noeud (j,k)
-        for (size_t k = 1; k < n; ++k) {
-            for (size_t j = 1; j < n; ++j) {
+        for (size_t k = 1; k < n; ++k)
+        {
+            for (size_t j = 1; j < n; ++j)
+            {
                 GRBLinExpr flot1 = 0;
                 GRBLinExpr flot2 = 0;
-                for (size_t i = 0; i < n; ++i) {
-                    if (i != j) {
+                for (size_t i = 0; i < n; ++i)
+                {
+                    if (i != j)
+                    {
                         flot1 += x[j][i][k - 1];
                         flot2 += x[i][j][k];
                     }
@@ -103,14 +115,17 @@ int main(int argc,
             }
         }
 
-        
         // Respect flot pour chaque sommet j
-        for (size_t j = 1; j < n; ++j) {
+        for (size_t j = 1; j < n; ++j)
+        {
             GRBLinExpr flot1 = 0;
             GRBLinExpr flot2 = 0;
-            for (size_t k = 0; k < n; ++k) {
-                for (size_t i = 0; i < n; ++i) {
-                    if (i != j) {
+            for (size_t k = 0; k < n; ++k)
+            {
+                for (size_t i = 0; i < n; ++i)
+                {
+                    if (i != j)
+                    {
                         flot1 += x[j][i][k];
                         flot2 += x[i][j][k];
                     }
@@ -123,23 +138,23 @@ int main(int argc,
             model.addConstr(flot2 == 1, ss.str());
         }
 
-        
         // On retourne sur le sommet 0 en dernière position
         GRBLinExpr arcSor1 = 0;
         GRBLinExpr arcSor2 = 0;
-        for (size_t i = 1; i < n; ++i) {
-            arcSor1 += x[0][i][n-1];
-            for (size_t j = 1; j < n; ++j) {
-                arcSor2 += x[j][i][n-1];
+        for (size_t i = 1; i < n; ++i)
+        {
+            arcSor1 += x[0][i][n - 1];
+            for (size_t j = 1; j < n; ++j)
+            {
+                arcSor2 += x[j][i][n - 1];
             }
         }
         model.addConstr(arcSor1 == 1);
         model.addConstr(arcSor2 == 0);
-        
 
         /*
         //passer une seule fois sur chaque sommet
-        
+
         for (size_t j = 0; j < n; ++j) {
             GRBLinExpr nbPass = 0;
                 for (size_t i = 1; i < n; ++i) {
@@ -148,7 +163,6 @@ int main(int argc,
                 }
             model.addConstr(nbPass == 1);
         }*/
-
 
         // Optimize model
         // --- Solver configuration ---
@@ -181,10 +195,13 @@ int main(int argc,
             int k = 0;
             for (size_t j = 1; j < n; ++j)
             {
-                if (k == n) break;
-                //cout << x[j][i][k].get(GRB_DoubleAttr_X) << endl;
-                if (x[j][i][k].get(GRB_DoubleAttr_X) == 1.0) {
-                    cout << "ville " << i << " --> " << "ville " << j << endl;
+                if (k == n)
+                    break;
+                // cout << x[j][i][k].get(GRB_DoubleAttr_X) << endl;
+                if (x[j][i][k].get(GRB_DoubleAttr_X) == 1.0)
+                {
+                    cout << "ville " << i << " --> "
+                         << "ville " << j << endl;
                     i = j;
                     j = 0;
                     k++;

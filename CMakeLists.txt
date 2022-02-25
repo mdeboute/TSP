@@ -11,7 +11,7 @@ set(GUROBI_INCLUDE_DIR /opt/local/stow/gurobi910/linux64/include/ /Library/gurob
 
 include_directories(include ${GUROBI_INCLUDE_DIR})
 
-file(GLOB SRC_MTZ src/main.cpp src/parser.cpp)
+file(GLOB SRC_MTZ src/mtz.cpp src/parser.cpp)
 add_executable(mtz.out ${SRC_MTZ})
 target_link_libraries(mtz.out ${GUROBI_LIBRARIES})
 
