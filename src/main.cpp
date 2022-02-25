@@ -109,23 +109,25 @@ int main(int argc,
           int status = model.get(GRB_IntAttr_Status);
           if (status == GRB_OPTIMAL || (status == GRB_TIME_LIMIT && model.get(GRB_IntAttr_SolCount) > 0))
           {
-               // the solver has computed the optimal solution or a feasible solution (when the time limit is reached before proving optimality)
-               cout << "Succes! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
-               cout << "Runtime : " << model.get(GRB_DoubleAttr_Runtime) << " seconds" << endl;
+              // the solver has computed the optimal solution or a feasible solution (when the time limit is reached before proving optimality)
+              cout << "Succes! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
+              cout << "Runtime : " << model.get(GRB_DoubleAttr_Runtime) << " seconds" << endl;
 
-               cout << "--> Printing results " << endl;
-               // model.write("solution.sol"); //< Writes the solution in a file
-               cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
+              cout << "--> Printing results " << endl;
+              // model.write("solution.sol"); //< Writes the solution in a file
+              cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
 
-               for (size_t i = 0; i < n; ++i)
-               {
-                    for (size_t j = 0; j < n; ++j)
-                    {
-                         if (x[j][i].get(GRB_DoubleAttr_X) == 1.0)
-                              cout << "ville " << i << " --> "
-                                   << "ville " << j << endl;
-                    }
-               }
+              int i = 0;
+              for (size_t j = 1; j < n; ++j)
+              {
+
+                  //cout << x[j][i].get(GRB_DoubleAttr_X) << endl;
+                  if (x[j][i].get(GRB_DoubleAttr_X) == 1.0) {
+                      cout << "ville " << i << " --> " << "ville " << j << endl;
+                      i = j;
+                      j = 0;
+                  }
+              }
           }
           else
           {

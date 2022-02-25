@@ -10,8 +10,13 @@ message(STATUS "GUROBI_LIBRARIES : ${GUROBI_LIBRARIES}")
 set(GUROBI_INCLUDE_DIR /opt/local/stow/gurobi910/linux64/include/ /Library/gurobi903/mac64/include/ C:/gurobi951/win64/include/)
 
 include_directories(include ${GUROBI_INCLUDE_DIR})
-file(GLOB SRC src/*.cpp)
-add_executable(a.out ${SRC})
-target_link_libraries(a.out ${GUROBI_LIBRARIES})
+
+file(GLOB SRC_MTZ src/main.cpp src/parser.cpp)
+add_executable(mtz.out ${SRC_MTZ})
+target_link_libraries(mtz.out ${GUROBI_LIBRARIES})
+
+file(GLOB SRC_FLOT src/flot.cpp src/parser.cpp)
+add_executable(flot.out ${SRC_FLOT})
+target_link_libraries(flot.out ${GUROBI_LIBRARIES})
 
 execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/TSP_data/ ${CMAKE_CURRENT_BINARY_DIR}/TSP_data)
