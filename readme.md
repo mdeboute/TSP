@@ -2,9 +2,9 @@
 
 ```shell
 mkdir -p build
-$ cd build
-$ cmake ..
-$ make
+cd build
+cmake ..
+make
 ```
 
 ## How to run executable files?
