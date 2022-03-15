@@ -125,7 +125,8 @@ int main(int argc,
                          cout << "ville " << i << " --> "
                               << "ville " << j << endl;
                          i = j;
-                         if (i == 0) break;
+                         if (i == 0)
+                              break;
                          j = -1;
                     }
                }

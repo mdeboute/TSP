@@ -2,67 +2,66 @@
 #include "parser.hpp"
 using namespace std;
 
-
-
-/**
-   This callback ensures that x \leq 1.
- */
-class SeparationCallback : public GRBCallback {
+class Callback : public GRBCallback
+{
 public:
-    GRBVar*** _x;
+    GRBVar ***_x;
     int n;
 
     /**
        The constructor is used to get a pointer to the variables that are needed.
      */
-    SeparationCallback(GRBVar*** x, int nb){
+    Callback(GRBVar ***x, int nb)
+    {
         _x = x;
         n = nb;
     }
 
 protected:
-
-    void callback() {
-        try {
-            if (where == GRB_CB_MIPSOL) {
+    void callback()
+    {
+        try
+        {
+            if (where == GRB_CB_MIPSOL && getIntInfo(GRB_CB_MIPNODE_STATUS) == GRB_OPTIMAL)
+            {
                 for (size_t i = 0; i < n; ++i)
                 {
                     for (size_t j = 0; j < n; ++j)
                     {
-                        for (size_t k = 1; k < n-2; ++k)
+                        for (size_t k = 1; k < n - 2; ++k)
                         {
                             int inVal = 0;
                             for (size_t l = 0; l < n; l++)
                             {
-                                if (l != i) inVal += (int)getSolution(_x[j][l][k + 1]);
+                                if (l != i)
+                                    inVal += (int)getSolution(_x[j][l][k + 1]);
                             }
                             int xVal = (int)getSolution(_x[i][j][k]);
-                                if (xVal > inVal) {
-                                    cout << "Constraint not satisfied : xVal <= inVal. Adding this constraint." << endl;
-                                    GRBLinExpr _inVal = 0;
-                                    for (size_t l = 0; l < n; l++)
-                                        if (l != i) _inVal += _x[j][l][k + 1];
-                                    addLazy(_x[i][j][k] <= _inVal);
+                            if (xVal > inVal)
+                            {
+                                cout << "Constraint not satisfied : xVal <= inVal. Adding this constraint." << endl;
+                                GRBLinExpr _inVal = 0;
+                                for (size_t l = 0; l < n; l++)
+                                    if (l != i)
+                                        _inVal += _x[j][l][k + 1];
+                                addLazy(_x[i][j][k] <= _inVal);
                             }
                         }
                     }
                 }
             }
         }
-        catch (GRBException e) {
+        catch (GRBException e)
+        {
             cout << "Error number: " << e.getErrorCode() << endl;
             cout << e.getMessage() << endl;
         }
-        catch (...) {
+        catch (...)
+        {
             cout << "Error during callback" << endl;
         }
     }
-
 };
-
-
-
-
 
 int main(int argc,
          char *argv[])
@@ -137,7 +136,7 @@ int main(int argc,
         model.addConstr(arcDeb1 == 1);
         model.addConstr(arcDeb2 == 0);
 
-        // Respect 1 flot à tout niveau k
+        // Respect 1 flot ï¿½ tout niveau k
         for (size_t k = 0; k < n; ++k)
         {
             GRBLinExpr flot = 0;
@@ -156,7 +155,7 @@ int main(int argc,
             model.addConstr(flot == 1, ss.str());
         }
 
-        // Respect flot à tout noeud (j,k)
+        // Respect flot ï¿½ tout noeud (j,k)
         for (size_t k = 1; k < n; ++k)
         {
             for (size_t j = 1; j < n; ++j)
@@ -200,7 +199,7 @@ int main(int argc,
             model.addConstr(flot2 == 1, ss.str());
         }
 
-        // On retourne sur le sommet 0 en dernière position
+        // On retourne sur le sommet 0 en derniï¿½re position
         GRBLinExpr arcSor1 = 0;
         GRBLinExpr arcSor2 = 0;
         for (size_t i = 1; i < n; ++i)
@@ -214,12 +213,10 @@ int main(int argc,
         model.addConstr(arcSor1 == 1);
         model.addConstr(arcSor2 == 0);
 
-
-        //Callback
-        SeparationCallback* myCallback = new SeparationCallback(x, n); // passing variable x to the solver callback  
-        model.setCallback(myCallback); // adding the callback to the model 
-
-
+        // Callback
+        model.set(GRB_IntParam_LazyConstraints, 1); // MANDATORYFOR LAZY CONSTRAINTS!
+        Callback *cb = new Callback(x, n);          // passing variable x to the solver callback
+        model.setCallback(cb);                      // adding the callback to the model
 
         /*
         //passer une seule fois sur chaque sommet
@@ -239,7 +236,7 @@ int main(int argc,
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 3);          //< limits the solver to single thread usage
 
-        /*ATTENTION : J'ai mis 3 threads car le solveur disait "succès" avec des valeurs de X non binaires. A voir de près*/
+        /*ATTENTION : J'ai mis 3 threads car le solveur disait "succï¿½s" avec des valeurs de X non binaires. A voir de prï¿½s*/
 
         // --- Solver launch ---
         cout << "--> Running the solver" << endl;
@@ -282,6 +279,7 @@ int main(int argc,
             // the model is infeasible (maybe wrong) or the solver has reached the time limit without finding a feasible solution
             cerr << "Fail! (Status: " << status << ")" << endl; //< see status page in the Gurobi documentation
         }
+        delete cb;
     }
     catch (GRBException e)
     {

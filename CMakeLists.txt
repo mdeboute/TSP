@@ -4,6 +4,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_library(GUROBI_LIBRARY_CPLUS libgurobi_c++.a OR gurobi_c++mdd2019.lib PATHS /opt/local/stow/gurobi910/linux64/lib/ /Library/gurobi903/mac64/lib/ C:/gurobi951/win64/lib/)
 find_library(GUROBI_LIBRARY libgurobi91.so OR libgurobi90.dylib OR gurobi95.lib PATHS /opt/local/stow/gurobi910/linux64/lib/ /Library/gurobi903/mac64/lib/ C:/gurobi951/win64/lib/)
+
 set(GUROBI_LIBRARIES ${GUROBI_LIBRARY_CPLUS} ${GUROBI_LIBRARY})
 message(STATUS "GUROBI_LIBRARIES : ${GUROBI_LIBRARIES}")
 
@@ -22,7 +23,6 @@ target_link_libraries(flot.out ${GUROBI_LIBRARIES})
 file(GLOB SRC_FLOT_CALLBACK src/flot_callback.cpp src/parser.cpp)
 add_executable(flot_callback.out ${SRC_FLOT_CALLBACK})
 target_link_libraries(flot_callback.out ${GUROBI_LIBRARIES})
-
 
 file(GLOB SRC_SOUSTOURS src/sousTours.cpp src/parser.cpp)
 add_executable(sousTours.out ${SRC_SOUSTOURS})

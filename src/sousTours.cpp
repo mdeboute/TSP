@@ -3,28 +3,31 @@
 #include <stack>
 using namespace std;
 
-
 /**
    This callback ensures that x \leq 1.
  */
-class SeparationCallback : public GRBCallback {
+class Callback : public GRBCallback
+{
 public:
-    GRBVar** x;
+    GRBVar **x;
     int n;
 
     /**
        The constructor is used to get a pointer to the variables that are needed.
      */
-    SeparationCallback(GRBVar** _x, int _n) {
+    Callback(GRBVar **_x, int _n)
+    {
         x = _x;
         n = _n;
     }
 
 protected:
-
-    void callback() {
-        try {
-            if (where == GRB_CB_MIPSOL) {
+    void callback()
+    {
+        try
+        {
+            if (where == GRB_CB_MIPSOL && getIntInfo(GRB_CB_MIPNODE_STATUS) == GRB_OPTIMAL)
+            {
                 GRBLinExpr tour = 0;
                 int taille = 0;
                 int i = 0;
@@ -36,39 +39,41 @@ protected:
                         tour += x[i][j];
                         taille += 1;
                         i = j;
-                        if (i == 0) break;
+                        if (i == 0)
+                            break;
                         j = -1;
                     }
                 }
-                cout << endl << "#######" << taille << "#######" << endl;
-                if (taille < n) { //sous-tour existe
+                cout << endl
+                     << "#######" << taille << "#######" << endl;
+                if (taille < n)
+                { // sous-tour existe
                     cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
                     addLazy(tour <= taille - 1);
                 }
             }
         }
-        catch (GRBException e) {
+        catch (GRBException e)
+        {
             cout << "Error number: " << e.getErrorCode() << endl;
             cout << e.getMessage() << endl;
         }
-        catch (...) {
+        catch (...)
+        {
             cout << "Error during callback" << endl;
         }
     }
-
 };
 
-
-
 int main(int argc,
-    char* argv[])
+         char *argv[])
 {
     // parse and save the data
     vector<vector<int> > c = parse(argv[1]);
     int n = c.size();
 
-    GRBVar** x = nullptr;
-    GRBVar* u = nullptr;
+    GRBVar **x = nullptr;
+    GRBVar *u = nullptr;
     try
     {
         // --- Creation of the Gurobi environment ---
@@ -84,7 +89,7 @@ int main(int argc,
         // --- Creation of the variables ---
         cout << "--> Creating the variables" << endl;
 
-        x = new GRBVar * [n];
+        x = new GRBVar *[n];
 
         for (size_t i = 0; i < n; ++i)
         {
@@ -138,9 +143,10 @@ int main(int argc,
             model.addConstr(flot2 == 1, ss.str());
         }
 
-        //Callback
-        SeparationCallback* myCallback = new SeparationCallback(x, n); // passing variable x to the solver callback  
-        model.setCallback(myCallback); // adding the callback to the model 
+        // Callback
+        model.set(GRB_IntParam_LazyConstraints, 1); // MANDATORYFOR LAZY CONSTRAINTS!
+        Callback *cb = new Callback(x, n);          // passing variable x to the solver callback
+        model.setCallback(cb);                      // adding the callback to the model
 
         /*
         // Elim. sous-tours
@@ -187,18 +193,20 @@ int main(int argc,
                 if (x[j][i].get(GRB_DoubleAttr_X) == 1.0)
                 {
                     cout << "ville " << i << " --> "
-                        << "ville " << j << endl;
+                         << "ville " << j << endl;
                     i = j;
-                    if (i == 0) break;
+                    if (i == 0)
+                        break;
                     j = -1;
                 }
-            }       
+            }
         }
         else
         {
             // the model is infeasible (maybe wrong) or the solver has reached the time limit without finding a feasible solution
             cerr << "Fail! (Status: " << status << ")" << endl; //< see status page in the Gurobi documentation
         }
+        delete cb;
     }
     catch (GRBException e)
     {
