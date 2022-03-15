@@ -22,7 +22,7 @@ protected:
     {
         try
         {
-            if (where == GRB_CB_MIPSOL && getIntInfo(GRB_CB_MIPNODE_STATUS) == GRB_OPTIMAL)
+            if (where == GRB_CB_MIPNODE)
             {
                 for (size_t i = 0; i < n; ++i)
                 {
@@ -44,7 +44,7 @@ protected:
                                 for (size_t l = 0; l < n; l++)
                                     if (l != i)
                                         _inVal += _x[j][l][k + 1];
-                                addLazy(_x[i][j][k] <= _inVal);
+                                addCut(_x[i][j][k] <= _inVal);
                             }
                         }
                     }
@@ -214,9 +214,9 @@ int main(int argc,
         model.addConstr(arcSor2 == 0);
 
         // Callback
-        model.set(GRB_IntParam_LazyConstraints, 1); // MANDATORYFOR LAZY CONSTRAINTS!
-        Callback *cb = new Callback(x, n);          // passing variable x to the solver callback
-        model.setCallback(cb);                      // adding the callback to the model
+        // model.set(GRB_IntParam_LazyConstraints, 1); // MANDATORYFOR LAZY CONSTRAINTS!
+        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
+        model.setCallback(cb);             // adding the callback to the model
 
         /*
         //passer une seule fois sur chaque sommet
