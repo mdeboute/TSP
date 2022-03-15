@@ -30,13 +30,13 @@ protected:
                     {
                         for (size_t k = 1; k < n - 2; ++k)
                         {
-                            int inVal = 0;
+                            double inVal = 0;
                             for (size_t l = 0; l < n; l++)
                             {
                                 if (l != i)
-                                    inVal += (int)getSolution(_x[j][l][k + 1]);
+                                    inVal += getNodeRel(_x[j][l][k + 1]);
                             }
-                            int xVal = (int)getSolution(_x[i][j][k]);
+                            double xVal = getNodeRel(_x[i][j][k]);
                             if (xVal > inVal)
                             {
                                 cout << "Constraint not satisfied : xVal <= inVal. Adding this constraint." << endl;
@@ -259,7 +259,7 @@ int main(int argc,
 
             int i = 0;
             int k = 0;
-            for (size_t j = 1; j < n; ++j)
+            for (size_t j = 0; j < n; ++j)
             {
                 if (k == n)
                     break;
@@ -269,7 +269,8 @@ int main(int argc,
                     cout << "ville " << i << " --> "
                          << "ville " << j << endl;
                     i = j;
-                    j = 0;
+                    if (i == 0) break;
+                    j = -1;
                     k++;
                 }
             }

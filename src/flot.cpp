@@ -193,7 +193,7 @@ int main(int argc,
 
             int i = 0;
             int k = 0;
-            for (size_t j = 1; j < n; ++j)
+            for (size_t j = 0; j < n; ++j)
             {
                 if (k == n)
                     break;
@@ -203,7 +203,8 @@ int main(int argc,
                     cout << "ville " << i << " --> "
                          << "ville " << j << endl;
                     i = j;
-                    j = 0;
+                    if (i == 0) break;
+                    j = -1;
                     k++;
                 }
             }
