@@ -118,16 +118,15 @@ int main(int argc,
                cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
 
                int i = 0;
-               for (size_t j = 1; j < n; ++j)
+               for (size_t j = 0; j < n; j++)
                {
-
-                    // cout << x[j][i].get(GRB_DoubleAttr_X) << endl;
                     if (x[j][i].get(GRB_DoubleAttr_X) == 1.0)
                     {
                          cout << "ville " << i << " --> "
                               << "ville " << j << endl;
                          i = j;
-                         j = 0;
+                         if (i == 0) break;
+                         j = -1;
                     }
                }
           }

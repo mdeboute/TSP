@@ -19,4 +19,13 @@ file(GLOB SRC_FLOT src/flot.cpp src/parser.cpp)
 add_executable(flot.out ${SRC_FLOT})
 target_link_libraries(flot.out ${GUROBI_LIBRARIES})
 
+file(GLOB SRC_FLOT_CALLBACK src/flot_callback.cpp src/parser.cpp)
+add_executable(flot_callback.out ${SRC_FLOT_CALLBACK})
+target_link_libraries(flot_callback.out ${GUROBI_LIBRARIES})
+
+
+file(GLOB SRC_SOUSTOURS src/sousTours.cpp src/parser.cpp)
+add_executable(sousTours.out ${SRC_SOUSTOURS})
+target_link_libraries(sousTours.out ${GUROBI_LIBRARIES})
+
 execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/TSP_data/ ${CMAKE_CURRENT_BINARY_DIR}/TSP_data)
