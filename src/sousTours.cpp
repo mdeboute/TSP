@@ -23,14 +23,14 @@ protected:
     {
         try
         {
-            if (where == GRB_CB_MIPSOL && getIntInfo(GRB_CB_MIPNODE_STATUS) == GRB_OPTIMAL)
+            if (where == GRB_CB_MIPNODE)
             {
                 GRBLinExpr tour = 0;
                 int taille = 0;
                 int i = 0;
                 for (size_t j = 0; j < n; ++j)
                 {
-                    int xVal = (int)getSolution(x[i][j]);
+                    int xVal = getNodeRel(x[i][j]);
                     if (xVal == 1)
                     {
                         tour += x[i][j];
@@ -46,7 +46,7 @@ protected:
                 if (taille < n)
                 { // sous-tour existe
                     cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
-                    addLazy(tour <= taille - 1);
+                    addCut(tour <= taille - 1);
                 }
             }
         }
@@ -141,9 +141,8 @@ int main(int argc,
         }
 
         // Callback
-        model.set(GRB_IntParam_LazyConstraints, 1); // MANDATORYFOR LAZY CONSTRAINTS!
-        Callback *cb = new Callback(x, n);          // passing variable x to the solver callback
-        model.setCallback(cb);                      // adding the callback to the model
+        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
+        model.setCallback(cb);             // adding the callback to the model
 
         /*
         // Elim. sous-tours

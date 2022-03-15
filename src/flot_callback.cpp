@@ -214,7 +214,6 @@ int main(int argc,
         model.addConstr(arcSor2 == 0);
 
         // Callback
-        // model.set(GRB_IntParam_LazyConstraints, 1); // MANDATORYFOR LAZY CONSTRAINTS!
         Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
 
@@ -269,7 +268,8 @@ int main(int argc,
                     cout << "ville " << i << " --> "
                          << "ville " << j << endl;
                     i = j;
-                    if (i == 0) break;
+                    if (i == 0)
+                        break;
                     j = -1;
                     k++;
                 }
