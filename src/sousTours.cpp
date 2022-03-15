@@ -3,9 +3,6 @@
 #include <stack>
 using namespace std;
 
-/**
-   This callback ensures that x \leq 1.
- */
 class Callback : public GRBCallback
 {
 public:
