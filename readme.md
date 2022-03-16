@@ -38,4 +38,4 @@ chmod u+x benchmark.sh
 ./benchmark.sh <INSTANCES_DIR> <SOLUTION_DIR> <MODEL>
 ```
 
-Where `<MODEL>` is the name of the corresponding cpp model file.
+Where `<MODEL>` is the name of the corresponding cpp model file without the extension.
