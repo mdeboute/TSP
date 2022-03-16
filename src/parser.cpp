@@ -17,14 +17,14 @@ void openFile(std::ifstream &file, std::string filePath)
 }
 
 // this method parse an instance and create a matrix of int from the 7th line
-std::vector<std::vector<int> > processFile(std::ifstream &file)
+std::vector<std::vector<int>> processFile(std::ifstream &file)
 {
     // data format:
     // 100000000 26 82 65
     // 66 100000000 56 39
     // 43 57 100000000 16
     std::string line;
-    std::vector<std::vector<int> > matrix;
+    std::vector<std::vector<int>> matrix;
     std::vector<int> row;
     char const delimiter = ' ';
 
@@ -53,11 +53,11 @@ std::vector<std::vector<int> > processFile(std::ifstream &file)
     return matrix;
 }
 
-std::vector<std::vector<int> > parse(std::string filePath)
+std::vector<std::vector<int>> parse(std::string filePath)
 {
     std::ifstream file;
     openFile(file, filePath);
-    std::vector<std::vector<int> > matrix = processFile(file);
+    std::vector<std::vector<int>> matrix = processFile(file);
     file.close();
     return matrix;
 }
