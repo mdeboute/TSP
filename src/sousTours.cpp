@@ -30,12 +30,12 @@ protected:
                 int taille = 0;
                 int i = 0;
                 for (size_t j = 0; j < n; ++j)
-                { 
+                {
                     double xVal = getSolution(x[i][j]);
                     if (xVal > 0.5)
                     {
                         indices.push_back(i);
-                        //tour += x[i][j];
+                        // tour += x[i][j];
                         taille += 1;
                         i = j;
                         if (i == 0)
@@ -43,14 +43,15 @@ protected:
                         j = -1;
                     }
                 }
-                //cout << endl  << "#######" << taille << "#######" << endl;
+                // cout << endl  << "#######" << taille << "#######" << endl;
                 if (taille < n)
                 { // sous-tour existe
-                    //cout << tour << endl;
-                    //cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
-                    for each (int k in indices)
+                    // cout << tour << endl;
+                    // cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
+                    for (int k : indices)
                     {
-                        for each (int l in indices) {
+                        for (int l : indices)
+                        {
                             tour += x[k][l];
                         }
                     }
@@ -74,7 +75,7 @@ int main(int argc,
          char *argv[])
 {
     // parse and save the data
-    vector<vector<int> > c = parse(argv[1]);
+    vector<vector<int>> c = parse(argv[1]);
     int n = c.size();
 
     GRBVar **x = nullptr;
@@ -84,7 +85,6 @@ int main(int argc,
         // --- Creation of the Gurobi environment ---
         cout << "--> Creating the Gurobi environment" << endl;
         GRBEnv env = GRBEnv(true);
-        // env.set("LogFile", "mip1.log"); ///< prints the log in a file
         env.start();
 
         // --- Creation of the Gurobi model ---
@@ -152,13 +152,12 @@ int main(int argc,
         Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
 
-
         // Optimize model
         // --- Solver configuration ---
         cout << "--> Configuring the solver" << endl;
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 1);          //< limits the solver to single thread usage
-        model.set(GRB_IntParam_LazyConstraints, 1);          //< informs of the use of lazy constraints
+        model.set(GRB_IntParam_LazyConstraints, 1);  //< informs of the use of lazy constraints
         // --- Solver launch ---
         cout << "--> Running the solver" << endl;
         model.optimize();
@@ -177,11 +176,11 @@ int main(int argc,
             cout << "--> Printing results " << endl;
             // model.write("solution.sol"); //< Writes the solution in a file
             cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
-            
+
             int i = 0;
             for (size_t j = 0; j < n; ++j)
             {
-                if ((int) x[i][j].get(GRB_DoubleAttr_X) == 1)
+                if ((int)x[i][j].get(GRB_DoubleAttr_X) == 1)
                 {
                     cout << "ville " << i << " --> "
                          << "ville " << j << endl;
@@ -214,7 +213,6 @@ int main(int argc,
             {
                 cout << "x[23][" << i << "] = " << x[23][i].get(GRB_DoubleAttr_X) << endl;
             }*/
-            
         }
         else
         {
