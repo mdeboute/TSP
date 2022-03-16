@@ -8,9 +8,9 @@ echo Model: $3
 mkdir -p $2 # create the output directory if it does not already exist
 echo `date` > $2/date.txt
 
+cd build
 for instance in `ls $1` ; do  # for each instance in directory $1
     echo Resolution of $instance
-    cd build
     ./$3.out $1/$instance -nv >> ../$2/log_${instance}.txt   # writing console output to a log file
 done
 
