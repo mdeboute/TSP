@@ -23,17 +23,19 @@ protected:
     {
         try
         {
-            if (where == GRB_CB_MIPNODE)
+            if (where == GRB_CB_MIPSOL)
             {
+                vector<int> indices;
                 GRBLinExpr tour = 0;
                 int taille = 0;
                 int i = 0;
                 for (size_t j = 0; j < n; ++j)
-                {
-                    int xVal = getNodeRel(x[i][j]);
-                    if (xVal == 1)
+                { 
+                    double xVal = getSolution(x[i][j]);
+                    if (xVal > 0.5)
                     {
-                        tour += x[i][j];
+                        indices.push_back(i);
+                        //tour += x[i][j];
                         taille += 1;
                         i = j;
                         if (i == 0)
@@ -41,12 +43,18 @@ protected:
                         j = -1;
                     }
                 }
-                cout << endl
-                     << "#######" << taille << "#######" << endl;
+                //cout << endl  << "#######" << taille << "#######" << endl;
                 if (taille < n)
                 { // sous-tour existe
-                    cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
-                    addCut(tour <= taille - 1);
+                    //cout << tour << endl;
+                    //cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
+                    for each (int k in indices)
+                    {
+                        for each (int l in indices) {
+                            tour += x[k][l];
+                        }
+                    }
+                    addLazy(tour <= taille - 1);
                 }
             }
         }
@@ -144,26 +152,13 @@ int main(int argc,
         Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
 
-        /*
-        // Elim. sous-tours
-        for (size_t i = 1; i < n; ++i)
-        {
-            for (size_t j = 1; j < n; ++j)
-            {
-                GRBLinExpr lhs = u[i] - u[j] + (n - 1) * x[j][i];
-                stringstream ss;
-                ss << "Sous-tours(" << j << "," << i << ")";
-                model.addConstr(lhs <= n - 2, ss.str());
-            }
-        }
-        */
 
         // Optimize model
         // --- Solver configuration ---
         cout << "--> Configuring the solver" << endl;
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 1);          //< limits the solver to single thread usage
-
+        model.set(GRB_IntParam_LazyConstraints, 1);          //< informs of the use of lazy constraints
         // --- Solver launch ---
         cout << "--> Running the solver" << endl;
         model.optimize();
@@ -182,11 +177,11 @@ int main(int argc,
             cout << "--> Printing results " << endl;
             // model.write("solution.sol"); //< Writes the solution in a file
             cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
-
+            
             int i = 0;
-            for (size_t j = 0; j < n; j++)
+            for (size_t j = 0; j < n; ++j)
             {
-                if (x[j][i].get(GRB_DoubleAttr_X) == 1.0)
+                if ((int) x[i][j].get(GRB_DoubleAttr_X) == 1)
                 {
                     cout << "ville " << i << " --> "
                          << "ville " << j << endl;
@@ -196,6 +191,30 @@ int main(int argc,
                     j = -1;
                 }
             }
+            /*cout << endl << "representation brute:" << endl << endl;
+
+
+            for (size_t i = 0; i < n; ++i)
+            {
+                for (size_t j = 0; j < n; ++j)
+                {
+                    if (x[i][j].get(GRB_DoubleAttr_X) == 1.0)
+                    {
+                        cout << "ville " << i << " --> "
+                            << "ville " << j << endl;
+                    }
+                }
+            }
+
+
+            cout << endl << "test:" << endl << endl;
+
+
+            for (size_t i = 0; i < n; ++i)
+            {
+                cout << "x[23][" << i << "] = " << x[23][i].get(GRB_DoubleAttr_X) << endl;
+            }*/
+            
         }
         else
         {
