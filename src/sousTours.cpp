@@ -74,6 +74,12 @@ protected:
 int main(int argc,
          char *argv[])
 {
+    bool verbose = true;
+    if (argv[2] != NULL && strcmp(argv[2], "-nv") == 0)
+    {
+        verbose = false;
+    }
+
     // parse and save the data
     vector<vector<int>> c = parse(argv[1]);
     int n = c.size();
@@ -83,16 +89,24 @@ int main(int argc,
     try
     {
         // --- Creation of the Gurobi environment ---
-        cout << "--> Creating the Gurobi environment" << endl;
+        if (verbose)
+            cout << "--> Creating the Gurobi environment" << endl;
         GRBEnv env = GRBEnv(true);
         env.start();
 
         // --- Creation of the Gurobi model ---
-        cout << "--> Creating the Gurobi model" << endl;
+        if (verbose)
+            cout << "--> Creating the Gurobi model" << endl;
         GRBModel model = GRBModel(env);
 
+        if (not verbose)
+        {
+            model.set(GRB_IntParam_OutputFlag, 0);
+        }
+
         // --- Creation of the variables ---
-        cout << "--> Creating the variables" << endl;
+        if (verbose)
+            cout << "--> Creating the variables" << endl;
 
         x = new GRBVar *[n];
 
@@ -108,7 +122,8 @@ int main(int argc,
         }
 
         // --- Creation of the objective function ---
-        cout << "--> Creating the objective function" << endl;
+        if (verbose)
+            cout << "--> Creating the objective function" << endl;
         GRBLinExpr obj = 0;
         for (size_t i = 0; i < n; ++i)
         {
@@ -120,7 +135,8 @@ int main(int argc,
         model.setObjective(obj, GRB_MINIMIZE);
 
         // --- Creation of the constraints ---
-        cout << "--> Creating the constraints" << endl;
+        if (verbose)
+            cout << "--> Creating the constraints" << endl;
 
         // Respect flot 1
         for (size_t j = 0; j < n; ++j)
@@ -154,65 +170,54 @@ int main(int argc,
 
         // Optimize model
         // --- Solver configuration ---
-        cout << "--> Configuring the solver" << endl;
+        if (verbose)
+            cout << "--> Configuring the solver" << endl;
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 1);          //< limits the solver to single thread usage
         model.set(GRB_IntParam_LazyConstraints, 1);  //< informs of the use of lazy constraints
+
         // --- Solver launch ---
-        cout << "--> Running the solver" << endl;
+        if (verbose)
+            cout << "--> Running the solver" << endl;
         model.optimize();
-        model.write("model.lp"); //< Writes the model in a file
+        // model.write("model.lp"); //< Writes the model in a file
 
         // --- Solver results retrieval ---
-        cout << "--> Retrieving solver results " << endl;
+        if (verbose)
+            cout << "--> Retrieving solver results " << endl;
 
         int status = model.get(GRB_IntAttr_Status);
         if (status == GRB_OPTIMAL || (status == GRB_TIME_LIMIT && model.get(GRB_IntAttr_SolCount) > 0))
         {
             // the solver has computed the optimal solution or a feasible solution (when the time limit is reached before proving optimality)
-            cout << "Succes! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
-            cout << "Runtime : " << model.get(GRB_DoubleAttr_Runtime) << " seconds" << endl;
-
-            cout << "--> Printing results " << endl;
-            // model.write("solution.sol"); //< Writes the solution in a file
-            cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
-
-            int i = 0;
-            for (size_t j = 0; j < n; ++j)
+            if (verbose)
             {
-                if ((int)x[i][j].get(GRB_DoubleAttr_X) == 1)
-                {
-                    cout << "ville " << i << " --> "
-                         << "ville " << j << endl;
-                    i = j;
-                    if (i == 0)
-                        break;
-                    j = -1;
-                }
+                cout << "Success! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
+                cout << "--> Printing results " << endl;
             }
-            /*cout << endl << "representation brute:" << endl << endl;
 
+            cout << "Result: ";
+            cout << argv[1] << "; ";
+            cout << "runtime = " << model.get(GRB_DoubleAttr_Runtime) << " sec; ";
+            cout << "objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //< gets the value of the objective function for the best computed solution (optimal if no time limit)
 
-            for (size_t i = 0; i < n; ++i)
+            if (verbose)
             {
+                int i = 0;
                 for (size_t j = 0; j < n; ++j)
                 {
-                    if (x[i][j].get(GRB_DoubleAttr_X) == 1.0)
+                    if ((int)x[i][j].get(GRB_DoubleAttr_X) == 1)
                     {
                         cout << "ville " << i << " --> "
-                            << "ville " << j << endl;
+                             << "ville " << j << endl;
+                        i = j;
+                        if (i == 0)
+                            break;
+                        j = -1;
                     }
                 }
             }
-
-
-            cout << endl << "test:" << endl << endl;
-
-
-            for (size_t i = 0; i < n; ++i)
-            {
-                cout << "x[23][" << i << "] = " << x[23][i].get(GRB_DoubleAttr_X) << endl;
-            }*/
+            // model.write("solution.sol"); //< Writes the solution in a file
         }
         else
         {

@@ -1,3 +1,0 @@
-File opened successfully
-Academic license - for non-commercial use only
-Result: TSP_data/ftv33.dat; runtime = 0.668702 sec; objective value = 1286

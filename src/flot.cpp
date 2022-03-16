@@ -5,25 +5,38 @@ using namespace std;
 int main(int argc,
          char *argv[])
 {
+    bool verbose = true;
+    if (argv[2] != NULL && strcmp(argv[2], "-nv") == 0)
+    {
+        verbose = false;
+    }
     // parse and save the data
-    vector<vector<int> > c = parse(argv[1]);
+    vector<vector<int>> c = parse(argv[1]);
     int n = c.size();
 
     GRBVar ***x = nullptr;
     try
     {
         // --- Creation of the Gurobi environment ---
-        cout << "--> Creating the Gurobi environment" << endl;
+        if (verbose)
+            cout << "--> Creating the Gurobi environment" << endl;
         GRBEnv env = GRBEnv(true);
         // env.set("LogFile", "mip1.log"); ///< prints the log in a file
         env.start();
 
         // --- Creation of the Gurobi model ---
-        cout << "--> Creating the Gurobi model" << endl;
+        if (verbose)
+            cout << "--> Creating the Gurobi model" << endl;
         GRBModel model = GRBModel(env);
 
+        if (not verbose)
+        {
+            model.set(GRB_IntParam_OutputFlag, 0);
+        }
+
         // --- Creation of the variables ---
-        cout << "--> Creating the variables" << endl;
+        if (verbose)
+            cout << "--> Creating the variables" << endl;
 
         x = new GRBVar **[n];
 
@@ -43,7 +56,8 @@ int main(int argc,
         }
 
         // --- Creation of the objective function ---
-        cout << "--> Creating the objective function" << endl;
+        if (verbose)
+            cout << "--> Creating the objective function" << endl;
         GRBLinExpr obj = 0;
         for (size_t i = 0; i < n; ++i)
         {
@@ -59,7 +73,8 @@ int main(int argc,
         model.setObjective(obj, GRB_MINIMIZE);
 
         // --- Creation of the constraints ---
-        cout << "--> Creating the constraints" << endl;
+        if (verbose)
+            cout << "--> Creating the constraints" << endl;
 
         // Le sommet 0 est le seul pris en position 0
         GRBLinExpr arcDeb1 = 0;
@@ -152,62 +167,60 @@ int main(int argc,
         model.addConstr(arcSor1 == 1);
         model.addConstr(arcSor2 == 0);
 
-        /*
-        //passer une seule fois sur chaque sommet
-
-        for (size_t j = 0; j < n; ++j) {
-            GRBLinExpr nbPass = 0;
-                for (size_t i = 1; i < n; ++i) {
-                    for (size_t k = 1; k < n; ++k)
-                        if(i!=j) nbPass += x[j][i][k];
-                }
-            model.addConstr(nbPass == 1);
-        }*/
-
         // Optimize model
         // --- Solver configuration ---
-        cout << "--> Configuring the solver" << endl;
+        if (verbose)
+            cout << "--> Configuring the solver" << endl;
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 3);          //< limits the solver to single thread usage
 
-        /*ATTENTION : J'ai mis 3 threads car le solveur disait "succès" avec des valeurs de X non binaires. A voir de près*/
-
         // --- Solver launch ---
-        cout << "--> Running the solver" << endl;
+        if (verbose)
+            cout << "--> Running the solver" << endl;
         model.optimize();
-        model.write("model.lp"); //< Writes the model in a file
+        // model.write("model.lp"); //< Writes the model in a file
 
         // --- Solver results retrieval ---
-        cout << "--> Retrieving solver results " << endl;
+        if (verbose)
+            cout << "--> Retrieving solver results " << endl;
 
         int status = model.get(GRB_IntAttr_Status);
         if (status == GRB_OPTIMAL || (status == GRB_TIME_LIMIT && model.get(GRB_IntAttr_SolCount) > 0))
         {
             // the solver has computed the optimal solution or a feasible solution (when the time limit is reached before proving optimality)
-            cout << "Succes! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
-            cout << "Runtime : " << model.get(GRB_DoubleAttr_Runtime) << " seconds" << endl;
-
-            cout << "--> Printing results " << endl;
-            // model.write("solution.sol"); //< Writes the solution in a file
-            cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
-
-            int i = 0;
-            int k = 0;
-            for (size_t j = 0; j < n; ++j)
+            if (verbose)
             {
-                if (k == n)
-                    break;
-                // cout << x[j][i][k].get(GRB_DoubleAttr_X) << endl;
-                if (x[j][i][k].get(GRB_DoubleAttr_X) == 1.0)
+                cout << "Success! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
+                cout << "--> Printing results " << endl;
+            }
+
+            cout << "Result: ";
+            cout << argv[1] << "; ";
+            cout << "runtime = " << model.get(GRB_DoubleAttr_Runtime) << " sec; ";
+            cout << "objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //< gets the value of the objective function for the best computed solution (optimal if no time limit)
+
+            if (verbose)
+            {
+                int i = 0;
+                int k = 0;
+                for (size_t j = 0; j < n; ++j)
                 {
-                    cout << "ville " << i << " --> "
-                         << "ville " << j << endl;
-                    i = j;
-                    if (i == 0) break;
-                    j = -1;
-                    k++;
+                    if (k == n)
+                        break;
+                    // cout << x[j][i][k].get(GRB_DoubleAttr_X) << endl;
+                    if (x[j][i][k].get(GRB_DoubleAttr_X) == 1.0)
+                    {
+                        cout << "ville " << i << " --> "
+                             << "ville " << j << endl;
+                        i = j;
+                        if (i == 0)
+                            break;
+                        j = -1;
+                        k++;
+                    }
                 }
             }
+            // model.write("solution.sol"); //< Writes the solution in a file
         }
         else
         {

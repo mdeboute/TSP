@@ -1,3 +1,0 @@
-File opened successfully
-Academic license - for non-commercial use only
-Result: TSP_data/ftv44.dat; runtime = 6.765 sec; objective value = 1613

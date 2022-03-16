@@ -1,3 +1,0 @@
-File opened successfully
-Academic license - for non-commercial use only
-Result: TSP_data/ftv170.dat; runtime = 73.1125 sec; objective value = 2755

@@ -1,3 +1,0 @@
-File opened successfully
-Academic license - for non-commercial use only
-Result: TSP_data/ftv38.dat; runtime = 1.40628 sec; objective value = 1530
