@@ -1,0 +1,2 @@
+File opened successfully
+Result: TSP_data//ftv64.dat; runtime = 600.031 sec; objective value = 2117
