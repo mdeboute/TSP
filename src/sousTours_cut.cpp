@@ -172,6 +172,11 @@ int main(int argc,
             model.addConstr(flot2 == 1, ss.str());
         }
 
+        // Callback
+        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
+        model.setCallback(cb);             // adding the callback to the model
+
+
         // Optimize model
         // --- Solver configuration ---
         if (verbose)

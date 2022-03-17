@@ -39,13 +39,14 @@ protected:
                                 if (l != i && j != l && (j == 0 || k + 1 != 0) && (j != 0 || k + 1 == 0) && (l == 0 || k + 1 != n - 1) && (l != 0 || k + 1 == n - 1))
                                     inVal += getNodeRel(_x[j][l][k + 1]);
                             }
-                            if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1)) {
+                            if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1))
+                            {
 
                                 double xVal = getNodeRel(_x[i][j][k]);
                                 if (xVal > inVal)
                                 {
-                                    //if (verbose)
-                                    //    cout << "Constraint not satisfied : xVal <= inVal. Adding this constraint." << endl;
+                                    // if (verbose)
+                                    //     cout << "Constraint not satisfied : xVal <= inVal. Adding this constraint." << endl;
                                     GRBLinExpr _inVal = 0;
                                     for (size_t l = 0; l < n; l++)
                                         if (l != i && j != l && (j == 0 || k + 1 != 0) && (j != 0 || k + 1 == 0) && (l == 0 || k + 1 != n - 1) && (l != 0 || k + 1 == n - 1))
@@ -53,7 +54,6 @@ protected:
                                     addCut(_x[i][j][k] <= _inVal);
                                 }
                             }
-
                         }
                     }
                 }
@@ -72,7 +72,7 @@ protected:
 };
 
 int main(int argc,
-    char* argv[])
+         char *argv[])
 {
     bool verbose = true;
     if (argv[2] != NULL && strcmp(argv[2], "-nv") == 0)
@@ -83,7 +83,7 @@ int main(int argc,
     vector<vector<int>> c = parse(argv[1]);
     int n = c.size();
 
-    GRBVar*** x = nullptr;
+    GRBVar ***x = nullptr;
     try
     {
         // --- Creation of the Gurobi environment ---
@@ -109,11 +109,11 @@ int main(int argc,
         if (verbose)
             cout << "--> Creating the variables" << endl;
 
-        x = new GRBVar * *[n];
+        x = new GRBVar **[n];
 
         for (size_t i = 0; i < n; ++i)
         {
-            x[i] = new GRBVar * [n];
+            x[i] = new GRBVar *[n];
             for (size_t j = 0; j < n; ++j)
             {
                 x[i][j] = new GRBVar[n];
@@ -243,14 +243,12 @@ int main(int argc,
         // --- Solver configuration ---
         if (verbose)
             cout << "--> Configuring the solver" << endl;
-        model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
-        model.set(GRB_IntParam_Threads, 3);          //< limits the solver to single thread usage
-
+        model.set(GRB_DoubleParam_TimeLimit, 60.0); //< sets the time limit (in seconds)
+        model.set(GRB_IntParam_Threads, 3);         //< limits the solver to single thread usage
 
         // Callback
-        Callback* cb = new Callback(x, n); // passing variable x to the solver callback
+        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
-
 
         // --- Solver launch ---
         if (verbose)
@@ -290,7 +288,7 @@ int main(int argc,
                         if (x[i][j][k].get(GRB_DoubleAttr_X) >= 0.5)
                         {
                             cout << "ville " << i << " --> "
-                                << "ville " << j << endl;
+                                 << "ville " << j << endl;
                             i = j;
                             if (i == 0)
                                 break;
