@@ -1,0 +1,9 @@
+sol_mtz/log_ftv170.dat.txt:Result: TSP_data//ftv170.dat; runtime = 443.2 sec; objective value = 2755
+sol_mtz/log_ftv33.dat.txt:Result: TSP_data//ftv33.dat; runtime = 0.968391 sec; objective value = 1286
+sol_mtz/log_ftv35.dat.txt:Result: TSP_data//ftv35.dat; runtime = 2.32521 sec; objective value = 1473
+sol_mtz/log_ftv38.dat.txt:Result: TSP_data//ftv38.dat; runtime = 4.12019 sec; objective value = 1530
+sol_mtz/log_ftv44.dat.txt:Result: TSP_data//ftv44.dat; runtime = 2.95875 sec; objective value = 1613
+sol_mtz/log_ftv47.dat.txt:Result: TSP_data//ftv47.dat; runtime = 12.4432 sec; objective value = 1776
+sol_mtz/log_ftv55.dat.txt:Result: TSP_data//ftv55.dat; runtime = 10.4622 sec; objective value = 1608
+sol_mtz/log_ftv64.dat.txt:Result: TSP_data//ftv64.dat; runtime = 48.1548 sec; objective value = 1839
+sol_mtz/log_ftv70.dat.txt:Result: TSP_data//ftv70.dat; runtime = 57.2244 sec; objective value = 1950
