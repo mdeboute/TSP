@@ -1,0 +1,2 @@
+File opened successfully
+Result: TSP_data//ftv35.dat; runtime = 2.32521 sec; objective value = 1473

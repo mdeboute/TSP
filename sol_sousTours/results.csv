@@ -1,0 +1,9 @@
+sol_sousTours/log_ftv170.dat.txt:Result: TSP_data//ftv170.dat; runtime = 600.114 sec; objective value = 3303
+sol_sousTours/log_ftv33.dat.txt:Result: TSP_data//ftv33.dat; runtime = 0.858863 sec; objective value = 1286
+sol_sousTours/log_ftv35.dat.txt:Result: TSP_data//ftv35.dat; runtime = 1.01383 sec; objective value = 1473
+sol_sousTours/log_ftv38.dat.txt:Result: TSP_data//ftv38.dat; runtime = 0.455106 sec; objective value = 1530
+sol_sousTours/log_ftv44.dat.txt:Result: TSP_data//ftv44.dat; runtime = 1.37616 sec; objective value = 1613
+sol_sousTours/log_ftv47.dat.txt:Result: TSP_data//ftv47.dat; runtime = 1.97399 sec; objective value = 1776
+sol_sousTours/log_ftv55.dat.txt:Result: TSP_data//ftv55.dat; runtime = 21.865 sec; objective value = 1608
+sol_sousTours/log_ftv64.dat.txt:Result: TSP_data//ftv64.dat; runtime = 10.0971 sec; objective value = 1839
+sol_sousTours/log_ftv70.dat.txt:Result: TSP_data//ftv70.dat; runtime = 108.835 sec; objective value = 1950

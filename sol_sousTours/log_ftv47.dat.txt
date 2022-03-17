@@ -1,0 +1,2 @@
+File opened successfully
+Result: TSP_data//ftv47.dat; runtime = 1.97399 sec; objective value = 1776
