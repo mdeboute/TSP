@@ -14,4 +14,5 @@ for instance in `ls $1` ; do  # for each instance in directory $1
     ./$3.out $1/$instance -nv >> ../$2/log_${instance}.txt   # writing console output to a log file
 done
 
+cd ..
 grep Result $2/*.txt >> $2/results.csv  # lines containing the word "Result" will be concatenated in the results.csv file

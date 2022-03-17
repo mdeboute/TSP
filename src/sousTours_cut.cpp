@@ -1,18 +1,19 @@
 #include "gurobi_c++.h"
 #include "parser.hpp"
 #include <stack>
+#include <cstring>
 using namespace std;
 
 class Callback : public GRBCallback
 {
 public:
-    GRBVar** x;
+    GRBVar **x;
     int n;
 
     /**
        The constructor is used to get a pointer to the variables that are needed.
      */
-    Callback(GRBVar** _x, int _n)
+    Callback(GRBVar **_x, int _n)
     {
         x = _x;
         n = _n;
@@ -35,7 +36,7 @@ protected:
                     if (xVal >= 0.5)
                     {
                         indices.push_back(i);
-                        //tour += x[i][j];
+                        // tour += x[i][j];
                         taille += 1;
                         i = j;
                         if (i == 0)
@@ -43,14 +44,15 @@ protected:
                         j = -1;
                     }
                 }
-                //cout << endl  << "#######" << taille << "#######" << endl;
+                // cout << endl  << "#######" << taille << "#######" << endl;
                 if (taille < n)
                 { // sous-tour existe
-                    //cout << tour << endl;
-                    //cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
-                    for each (int k in indices)
+                    // cout << tour << endl;
+                    // cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
+                    for (int k : indices)
                     {
-                        for each (int l in indices) {
+                        for (int l : indices)
+                        {
                             tour += x[k][l];
                         }
                     }
@@ -71,32 +73,46 @@ protected:
 };
 
 int main(int argc,
-    char* argv[])
+         char *argv[])
 {
+    bool verbose = true;
+    if (argv[2] != NULL && strcmp(argv[2], "-nv") == 0)
+    {
+        verbose = false;
+    }
+
     // parse and save the data
-    vector<vector<int> > c = parse(argv[1]);
+    vector<vector<int>> c = parse(argv[1]);
     int n = c.size();
 
-    GRBVar** x = nullptr;
-    GRBVar* u = nullptr;
+    GRBVar **x = nullptr;
+    GRBVar *u = nullptr;
     try
     {
         // --- Creation of the Gurobi environment ---
-        cout << "--> Creating the Gurobi environment" << endl;
+        if (verbose)
+            cout << "--> Creating the Gurobi environment" << endl;
         GRBEnv env = GRBEnv(true);
         // env.set("LogFile", "mip1.log"); ///< prints the log in a file
         env.start();
 
         // --- Creation of the Gurobi model ---
-        cout << "--> Creating the Gurobi model" << endl;
+        if (verbose)
+            cout << "--> Creating the Gurobi model" << endl;
         GRBModel model = GRBModel(env);
+
+        if (not verbose)
+        {
+            model.set(GRB_IntParam_OutputFlag, 0);
+        }
+
         model.getEnv().set(GRB_IntParam_PreCrush, 1);
-        //model.getEnv().set(GRB_IntParam_LazyConstraints, 1);
 
         // --- Creation of the variables ---
-        cout << "--> Creating the variables" << endl;
+        if (verbose)
+            cout << "--> Creating the variables" << endl;
 
-        x = new GRBVar * [n];
+        x = new GRBVar *[n];
 
         for (size_t i = 0; i < n; ++i)
         {
@@ -110,7 +126,8 @@ int main(int argc,
         }
 
         // --- Creation of the objective function ---
-        cout << "--> Creating the objective function" << endl;
+        if (verbose)
+            cout << "--> Creating the objective function" << endl;
         GRBLinExpr obj = 0;
         for (size_t i = 0; i < n; ++i)
         {
@@ -122,7 +139,8 @@ int main(int argc,
         model.setObjective(obj, GRB_MINIMIZE);
 
         // --- Creation of the constraints ---
-        cout << "--> Creating the constraints" << endl;
+        if (verbose)
+            cout << "--> Creating the constraints" << endl;
 
         // Respect flot 1
         for (size_t j = 0; j < n; ++j)
@@ -151,72 +169,74 @@ int main(int argc,
         }
 
         // Callback
-        Callback* cb = new Callback(x, n); // passing variable x to the solver callback
+        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
-
 
         // Optimize model
         // --- Solver configuration ---
-        cout << "--> Configuring the solver" << endl;
+        if (verbose)
+            cout << "--> Configuring the solver" << endl;
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 1);          //< limits the solver to single thread usage
-        //model.set(GRB_IntParam_LazyConstraints, 1);          //< informs of the use of lazy constraints
-        // --- Solver launch ---
-        cout << "--> Running the solver" << endl;
+
+        //  --- Solver launch ---
+        if (verbose)
+            cout << "--> Running the solver" << endl;
         model.optimize();
-        model.write("model.lp"); //< Writes the model in a file
+        // model.write("model.lp"); //< Writes the model in a file
 
         // --- Solver results retrieval ---
-        cout << "--> Retrieving solver results " << endl;
+        if (verbose)
+            cout << "--> Retrieving solver results " << endl;
 
         int status = model.get(GRB_IntAttr_Status);
         if (status == GRB_OPTIMAL || (status == GRB_TIME_LIMIT && model.get(GRB_IntAttr_SolCount) > 0))
         {
             // the solver has computed the optimal solution or a feasible solution (when the time limit is reached before proving optimality)
-            cout << "Succes! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
-            cout << "Runtime : " << model.get(GRB_DoubleAttr_Runtime) << " seconds" << endl;
-
-            cout << "--> Printing results " << endl;
-            // model.write("solution.sol"); //< Writes the solution in a file
-            cout << "Objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //<gets the value of the objective function for the best computed solution (optimal if no time limit)
-
-            int i = 0;
-            for (size_t j = 0; j < n; ++j)
+            if (verbose)
             {
-                if ((int)x[i][j].get(GRB_DoubleAttr_X) == 1)
-                {
-                    cout << "ville " << i << " --> "
-                        << "ville " << j << endl;
-                    i = j;
-                    if (i == 0)
-                        break;
-                    j = -1;
-                }
+                cout << "Success! (Status: " << status << ")" << endl; //< prints the solver status (see the gurobi documentation)
+                cout << "--> Printing results " << endl;
             }
-            cout << endl << "representation brute:" << endl << endl;
 
+            cout << "Result: ";
+            cout << argv[1] << "; ";
+            cout << "runtime = " << model.get(GRB_DoubleAttr_Runtime) << " sec; ";
+            cout << "objective value = " << model.get(GRB_DoubleAttr_ObjVal) << endl; //< gets the value of the objective function for the best computed solution (optimal if no time limit)
 
-            for (size_t i = 0; i < n; ++i)
+            if (verbose)
             {
+                int i = 0;
                 for (size_t j = 0; j < n; ++j)
                 {
-                    if (x[i][j].get(GRB_DoubleAttr_X) == 1.0)
+                    if ((int)x[i][j].get(GRB_DoubleAttr_X) == 1)
                     {
                         cout << "ville " << i << " --> "
-                            << "ville " << j << endl;
+                             << "ville " << j << endl;
+                        i = j;
+                        if (i == 0)
+                            break;
+                        j = -1;
+                    }
+                }
+
+                cout << endl
+                     << "representation brute:" << endl
+                     << endl;
+
+                for (size_t i = 0; i < n; ++i)
+                {
+                    for (size_t j = 0; j < n; ++j)
+                    {
+                        if (x[i][j].get(GRB_DoubleAttr_X) == 1.0)
+                        {
+                            cout << "ville " << i << " --> "
+                                 << "ville " << j << endl;
+                        }
                     }
                 }
             }
-
-            /*
-            cout << endl << "test:" << endl << endl;
-
-
-            for (size_t i = 0; i < n; ++i)
-            {
-                cout << "x[23][" << i << "] = " << x[23][i].get(GRB_DoubleAttr_X) << endl;
-            }*/
-
+            // model.write("solution.sol"); //< Writes the solution in a file
         }
         else
         {

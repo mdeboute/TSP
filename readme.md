@@ -1,4 +1,6 @@
-# How to compile executable files?
+# Traveling Salesman Problem
+
+## How to compile executable files?
 
 ```shell
 mkdir -p build
@@ -24,3 +26,16 @@ For the flot model:
 ```
 
 etc...
+
+PS: for each model/executable file, you have the `-nv` (non-verbose) option which will just print the final result of the program on the terminal.
+
+## How to run the tests?
+
+In the project directory:
+
+```shell
+chmod u+x benchmark.sh
+./benchmark.sh <INSTANCES_DIR> <SOLUTION_DIR> <MODEL>
+```
+
+Where `<MODEL>` is the name of the corresponding cpp model file without the extension.
