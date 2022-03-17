@@ -33,7 +33,17 @@ Ce modèle ajoute au précédent des inégalités valides par le biais des callbacks.
 
 
 5.
+Flot_am
+./TSP_data/ftv33.dat; Best objective 1.286000000000e+03, best bound 1.286000000000e+03, gap 0.0000%
+./TSP_data/ftv44.dat; Best objective 1.644000000000e+03, best bound 1.559000000000e+03, gap 5.1703%
+./TSP_data/ftv70.dat; Best objective 2.366000000000e+03, best bound 1.784000000000e+03, gap 24.5985%
 
+Flot_callback
+./TSP_data/ftv33.dat; Best objective 1.286000000000e+03, best bound 1.286000000000e+03, gap 0.0000%
+./TSP_data/ftv44.dat; Best objective 1.754000000000e+03, best bound 1.574000000000e+03, gap 10.2623%
+./TSP_data/ftv70.dat; Best objective 2.366000000000e+03, best bound 1.784000000000e+03, gap 24.5985%
+
+Tous les métriques semblent indiquer que le premier modèle est meilleur.
 
 6, 7, 8, 9. Modèlisation des sous-tours
 
