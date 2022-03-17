@@ -31,7 +31,7 @@ int main(int argc,
                cout << "--> Creating the Gurobi model" << endl;
           GRBModel model = GRBModel(env);
 
-          if (not verbose)
+          if (!verbose)
           {
                model.set(GRB_IntParam_OutputFlag, 0);
           }

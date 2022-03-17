@@ -30,7 +30,7 @@ int main(int argc,
             cout << "--> Creating the Gurobi model" << endl;
         GRBModel model = GRBModel(env);
 
-        if (not verbose)
+        if (!verbose)
         {
             model.set(GRB_IntParam_OutputFlag, 0);
         }
@@ -211,7 +211,7 @@ int main(int argc,
                         break;
                     if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1))
                     {
-                        if ((int)x[i][j][k].get(GRB_DoubleAttr_X) == 1)
+                        if (x[i][j][k].get(GRB_DoubleAttr_X) >= 0.5)
                         {
                             cout << "ville " << i << " --> "
                                  << "ville " << j << endl;
