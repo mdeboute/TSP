@@ -198,7 +198,7 @@ int main(int argc,
                 if (k == n)
                     break;
                 // cout << x[j][i][k].get(GRB_DoubleAttr_X) << endl;
-                if (x[j][i][k].get(GRB_DoubleAttr_X) == 1.0)
+                if (x[j][i][k].get(GRB_DoubleAttr_X) >= 0.5)
                 {
                     cout << "ville " << i << " --> "
                          << "ville " << j << endl;
