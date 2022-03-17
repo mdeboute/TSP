@@ -24,7 +24,7 @@ protected:
     {
         try
         {
-            if (where == GRB_CB_MIPNODE)
+            if (where == GRB_CB_MIPNODE && getIntInfo(GRB_CB_MIPNODE_STATUS) == GRB_OPTIMAL)
             {
                 vector<int> indices;
                 GRBLinExpr tour = 0;
@@ -33,8 +33,9 @@ protected:
                 for (int j = 0; j < n; ++j)
                 {
                     double xVal = getNodeRel(x[i][j]);
-                    if (xVal >= 0.5)
+                    if (xVal > 0)
                     {
+                        cout << "x(" << i << "," << j << ")" << xVal << endl;
                         indices.push_back(i);
                         // tour += x[i][j];
                         taille += 1;
@@ -48,7 +49,7 @@ protected:
                 if (taille < n)
                 { // sous-tour existe
                     // cout << tour << endl;
-                    // cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
+                    cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
                     for (int k : indices)
                     {
                         for (int l : indices)
@@ -101,7 +102,7 @@ int main(int argc,
             cout << "--> Creating the Gurobi model" << endl;
         GRBModel model = GRBModel(env);
 
-        if (not verbose)
+        if (!verbose)
         {
             model.set(GRB_IntParam_OutputFlag, 0);
         }
@@ -171,6 +172,7 @@ int main(int argc,
         // Callback
         Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
+
 
         // Optimize model
         // --- Solver configuration ---

@@ -25,7 +25,7 @@ protected:
     {
         try
         {
-            if (where == GRB_CB_MIPNODE)
+            if (where == GRB_CB_MIPNODE && getIntInfo(GRB_CB_MIPNODE_STATUS) == GRB_OPTIMAL)
             {
                 for (size_t i = 0; i < n; ++i)
                 {
@@ -36,20 +36,24 @@ protected:
                             double inVal = 0;
                             for (size_t l = 0; l < n; l++)
                             {
-                                if (l != i)
+                                if (l != i && j != l && (j == 0 || k + 1 != 0) && (j != 0 || k + 1 == 0) && (l == 0 || k + 1 != n - 1) && (l != 0 || k + 1 == n - 1))
                                     inVal += getNodeRel(_x[j][l][k + 1]);
                             }
-                            double xVal = getNodeRel(_x[i][j][k]);
-                            if (xVal > inVal)
-                            {
-                                if (verbose)
-                                    cout << "Constraint not satisfied : xVal <= inVal. Adding this constraint." << endl;
-                                GRBLinExpr _inVal = 0;
-                                for (size_t l = 0; l < n; l++)
-                                    if (l != i)
-                                        _inVal += _x[j][l][k + 1];
-                                addCut(_x[i][j][k] <= _inVal);
+                            if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1)) {
+
+                                double xVal = getNodeRel(_x[i][j][k]);
+                                if (xVal > inVal)
+                                {
+                                    //if (verbose)
+                                    //    cout << "Constraint not satisfied : xVal <= inVal. Adding this constraint." << endl;
+                                    GRBLinExpr _inVal = 0;
+                                    for (size_t l = 0; l < n; l++)
+                                        if (l != i && j != l && (j == 0 || k + 1 != 0) && (j != 0 || k + 1 == 0) && (l == 0 || k + 1 != n - 1) && (l != 0 || k + 1 == n - 1))
+                                            _inVal += _x[j][l][k + 1];
+                                    addCut(_x[i][j][k] <= _inVal);
+                                }
                             }
+
                         }
                     }
                 }
@@ -68,8 +72,9 @@ protected:
 };
 
 int main(int argc,
-         char *argv[])
+    char* argv[])
 {
+    bool verbose = true;
     if (argv[2] != NULL && strcmp(argv[2], "-nv") == 0)
     {
         verbose = false;
@@ -78,7 +83,7 @@ int main(int argc,
     vector<vector<int>> c = parse(argv[1]);
     int n = c.size();
 
-    GRBVar ***x = nullptr;
+    GRBVar*** x = nullptr;
     try
     {
         // --- Creation of the Gurobi environment ---
@@ -93,7 +98,9 @@ int main(int argc,
             cout << "--> Creating the Gurobi model" << endl;
         GRBModel model = GRBModel(env);
 
-        if (not verbose)
+        model.getEnv().set(GRB_IntParam_PreCrush, 1);
+
+        if (!verbose)
         {
             model.set(GRB_IntParam_OutputFlag, 0);
         }
@@ -102,19 +109,23 @@ int main(int argc,
         if (verbose)
             cout << "--> Creating the variables" << endl;
 
-        x = new GRBVar **[n];
+        x = new GRBVar * *[n];
 
-        for (size_t j = 0; j < n; ++j)
+        for (size_t i = 0; i < n; ++i)
         {
-            x[j] = new GRBVar *[n];
-            for (size_t i = 0; i < n; ++i)
+            x[i] = new GRBVar * [n];
+            for (size_t j = 0; j < n; ++j)
             {
-                x[j][i] = new GRBVar[n];
+                x[i][j] = new GRBVar[n];
                 for (size_t k = 0; k < n; ++k)
                 {
-                    stringstream ss;
-                    ss << "x(" << i << "," << j << "," << k << ")";
-                    x[j][i][k] = model.addVar(0.0, 1.0, 0.0, GRB_BINARY, ss.str());
+                    if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1))
+                    {
+                        // cout << "x(" << i << "," << j << "," << k << ")" << endl;
+                        stringstream ss;
+                        ss << "x(" << i << "," << j << "," << k << ")";
+                        x[i][j][k] = model.addVar(0.0, 1.0, 0.0, GRB_BINARY, ss.str());
+                    }
                 }
             }
         }
@@ -129,8 +140,8 @@ int main(int argc,
             {
                 for (size_t k = 0; k < n; ++k)
                 {
-                    if (i != j)
-                        obj += c[j][i] * x[j][i][k];
+                    if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1))
+                        obj += c[i][j] * x[i][j][k];
                 }
             }
         }
@@ -140,29 +151,23 @@ int main(int argc,
         if (verbose)
             cout << "--> Creating the constraints" << endl;
 
-        // Le sommet 0 est le seul pris en position 0
-        GRBLinExpr arcDeb1 = 0;
-        GRBLinExpr arcDeb2 = 0;
+        // Le sommet 0 est le seul pris en position 0 ****** maybe unnecessary
+        GRBLinExpr arcDeb = 0;
         for (size_t j = 1; j < n; ++j)
         {
-            arcDeb1 += x[j][0][0];
-            for (size_t i = 1; i < n; ++i)
-            {
-                arcDeb2 += x[j][i][0];
-            }
+            arcDeb += x[0][j][0];
         }
-        model.addConstr(arcDeb1 == 1);
-        model.addConstr(arcDeb2 == 0);
+        model.addConstr(arcDeb == 1);
 
         // Respect 1 flot � tout niveau k
         for (size_t k = 0; k < n; ++k)
         {
             GRBLinExpr flot = 0;
-            for (size_t j = 0; j < n; ++j)
+            for (size_t i = 0; i < n; ++i)
             {
-                for (size_t i = 0; i < n; ++i)
+                for (size_t j = 0; j < n; ++j)
                 {
-                    if (i != j)
+                    if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1))
                     {
                         flot += x[i][j][k];
                     }
@@ -182,10 +187,16 @@ int main(int argc,
                 GRBLinExpr flot2 = 0;
                 for (size_t i = 0; i < n; ++i)
                 {
-                    if (i != j)
+                    if (i != j && (i == 0 || k - 1 != 0) && (i != 0 || k - 1 == 0) && (j == 0 || k - 1 != n - 1) && (j != 0 || k - 1 == n - 1))
                     {
-                        flot1 += x[j][i][k - 1];
-                        flot2 += x[i][j][k];
+                        // cout << "x1(" << i << "," << j << "," << k-1 << ")" << endl;
+
+                        flot1 += x[i][j][k - 1];
+                    }
+                    if (j != i && (j == 0 || k != 0) && (j != 0 || k == 0) && (i == 0 || k != n - 1) && (i != 0 || k == n - 1))
+                    {
+                        // cout << "x2(" << j << "," << i << "," << k << ")" << endl;
+                        flot2 += x[j][i][k];
                     }
                 }
                 stringstream ss;
@@ -195,7 +206,7 @@ int main(int argc,
         }
 
         // Respect flot pour chaque sommet j
-        for (size_t j = 1; j < n; ++j)
+        for (size_t j = 0; j < n; ++j)
         {
             GRBLinExpr flot1 = 0;
             GRBLinExpr flot2 = 0;
@@ -203,10 +214,13 @@ int main(int argc,
             {
                 for (size_t i = 0; i < n; ++i)
                 {
-                    if (i != j)
+                    if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1))
                     {
-                        flot1 += x[j][i][k];
-                        flot2 += x[i][j][k];
+                        flot1 += x[i][j][k];
+                    }
+                    if (j != i && (j == 0 || k != 0) && (j != 0 || k == 0) && (i == 0 || k != n - 1) && (i != 0 || k == n - 1))
+                    {
+                        flot2 += x[j][i][k];
                     }
                 }
             }
@@ -218,22 +232,12 @@ int main(int argc,
         }
 
         // On retourne sur le sommet 0 en derni�re position
-        GRBLinExpr arcSor1 = 0;
-        GRBLinExpr arcSor2 = 0;
+        GRBLinExpr arcSor = 0;
         for (size_t i = 1; i < n; ++i)
         {
-            arcSor1 += x[0][i][n - 1];
-            for (size_t j = 1; j < n; ++j)
-            {
-                arcSor2 += x[j][i][n - 1];
-            }
+            arcSor += x[i][0][n - 1];
         }
-        model.addConstr(arcSor1 == 1);
-        model.addConstr(arcSor2 == 0);
-
-        // Callback
-        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
-        model.setCallback(cb);             // adding the callback to the model
+        model.addConstr(arcSor == 1);
 
         // Optimize model
         // --- Solver configuration ---
@@ -241,6 +245,12 @@ int main(int argc,
             cout << "--> Configuring the solver" << endl;
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 3);          //< limits the solver to single thread usage
+
+
+        // Callback
+        Callback* cb = new Callback(x, n); // passing variable x to the solver callback
+        model.setCallback(cb);             // adding the callback to the model
+
 
         // --- Solver launch ---
         if (verbose)
@@ -275,16 +285,18 @@ int main(int argc,
                 {
                     if (k == n)
                         break;
-                    // cout << x[j][i][k].get(GRB_DoubleAttr_X) << endl;
-                    if (x[j][i][k].get(GRB_DoubleAttr_X) == 1.0)
+                    if (i != j && (i == 0 || k != 0) && (i != 0 || k == 0) && (j == 0 || k != n - 1) && (j != 0 || k == n - 1))
                     {
-                        cout << "ville " << i << " --> "
-                             << "ville " << j << endl;
-                        i = j;
-                        if (i == 0)
-                            break;
-                        j = -1;
-                        k++;
+                        if (x[i][j][k].get(GRB_DoubleAttr_X) >= 0.5)
+                        {
+                            cout << "ville " << i << " --> "
+                                << "ville " << j << endl;
+                            i = j;
+                            if (i == 0)
+                                break;
+                            j = -1;
+                            k++;
+                        }
                     }
                 }
             }
@@ -295,7 +307,6 @@ int main(int argc,
             // the model is infeasible (maybe wrong) or the solver has reached the time limit without finding a feasible solution
             cerr << "Fail! (Status: " << status << ")" << endl; //< see status page in the Gurobi documentation
         }
-        delete cb;
     }
     catch (GRBException e)
     {
