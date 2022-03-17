@@ -173,7 +173,6 @@ int main(int argc,
         Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
 
-
         // Optimize model
         // --- Solver configuration ---
         if (verbose)
