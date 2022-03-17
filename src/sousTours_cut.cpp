@@ -7,13 +7,13 @@ using namespace std;
 class Callback : public GRBCallback
 {
 public:
-    GRBVar** _x;
+    GRBVar **_x;
     int n;
 
     /**
        The constructor is used to get a pointer to the variables that are needed.
      */
-    Callback(GRBVar** x, int nb)
+    Callback(GRBVar **x, int nb)
     {
         cout << "here" << endl;
         _x = x;
@@ -176,7 +176,6 @@ int main(int argc,
         Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
 
-
         // Optimize model
         // --- Solver configuration ---
         if (verbose)
@@ -184,11 +183,9 @@ int main(int argc,
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 1);          //< limits the solver to single thread usage
 
-
         // Callback
-        Callback* cb = new Callback(x, n); // passing variable x to the solver callback
+        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
         model.setCallback(cb);             // adding the callback to the model
-
 
         //  --- Solver launch ---
         if (verbose)
