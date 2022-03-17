@@ -48,9 +48,9 @@ protected:
                 { // sous-tour existe
                     // cout << tour << endl;
                     // cout << "Constraint not satisfied : sous tour de taille " << taille << " existe. Adding this constraint." << endl;
-                    for each (int k in indices)
+                    for (int k : indices)
                     {
-                        for each (int l in indices)
+                        for (int l : indices)
                         {
                             tour += x[k][l];
                         }
