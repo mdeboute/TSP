@@ -1,2 +1,58 @@
 Projet TSP - Lin Hirwa Shema & Martin Debouté
 
+
+1. Modélisation MTZ (mtz.cpp)
+
+Réussite avec les résultats:
+
+TSP_data//ftv33.dat; runtime = 0.968391 sec; objective value = 1286
+TSP_data//ftv35.dat; runtime = 2.32521 sec; objective value = 1473
+TSP_data//ftv38.dat; runtime = 4.12019 sec; objective value = 1530
+TSP_data//ftv44.dat; runtime = 2.95875 sec; objective value = 1613
+TSP_data//ftv47.dat; runtime = 12.4432 sec; objective value = 1776
+TSP_data//ftv55.dat; runtime = 10.4622 sec; objective value = 1608
+TSP_data//ftv64.dat; runtime = 48.1548 sec; objective value = 1839
+TSP_data//ftv70.dat; runtime = 57.2244 sec; objective value = 1950
+TSP_data//ftv170.dat; runtime = 443.2 sec; objective value = 2755
+
+
+2.  Modélisation de flot simple (flot.cpp)
+
+Ce modèle donne la bonne solution optimale mais il est nettement plus lent que celui de MTZ.
+
+
+3. Modélisation de flot ameliorée (flot_am.cpp)
+
+On a implémenté ce modèle à en utilisant des ifs lors de la creation des variables et leurs appels. 
+Cette implémentation élimine 3(n-1) variable et donne la bonne valeur optimale, mais malheureusement elle augmente le temps de résolution.
+
+
+4. Modélisation de flot user cuts (flot_callback.cpp)
+
+Ce modèle ajoute au précédent des inégalités valides par le biais des callbacks. Il résoud dans un temps un peu inférieure au modèle précedent.
+
+
+5.
+
+
+6, 7, 8, 9. Modèlisation des sous-tours
+
+Le modèle des sous-tours a bien été implémenté avec les callbacks qui éliminent les sous-tours dans les solutions entières.
+Voici les résutlats sur toutes les instances:
+
+TSP_data//ftv33.dat; runtime = 0.858863 sec; objective value = 1286
+TSP_data//ftv35.dat; runtime = 1.01383 sec; objective value = 1473
+TSP_data//ftv38.dat; runtime = 0.455106 sec; objective value = 1530
+TSP_data//ftv44.dat; runtime = 1.37616 sec; objective value = 1613
+TSP_data//ftv47.dat; runtime = 1.97399 sec; objective value = 1776
+TSP_data//ftv55.dat; runtime = 21.865 sec; objective value = 1608
+TSP_data//ftv64.dat; runtime = 10.0971 sec; objective value = 1839
+TSP_data//ftv70.dat; runtime = 108.835 sec; objective value = 1950
+TSP_data//ftv170.dat; runtime = 600.114 sec; objective value = 3303
+
+Comme on peut l'observer, le modèle des sous-tours donne un bonne solution et dans moins de temps que MTZ pour les petites instances.
+Par contre il prends plus de temps pour les grandes instances et dans le cas de "ftv170" il donne une valeur objective trop grande par rapport à MTZ.
+
+
+10. On a éssayé d'implémenter le modèle des sous-tours permettant d’éliminer les sous-tours dans des solutions fractionnaires, mais celui-ci n'est pas fonctionnel.
+Lors de la résolution, il ignore les callbacks et retourne une solution avec des sous-tours malgré tous les ajustements.

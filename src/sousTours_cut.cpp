@@ -7,16 +7,17 @@ using namespace std;
 class Callback : public GRBCallback
 {
 public:
-    GRBVar **x;
+    GRBVar** _x;
     int n;
 
     /**
        The constructor is used to get a pointer to the variables that are needed.
      */
-    Callback(GRBVar **_x, int _n)
+    Callback(GRBVar** x, int nb)
     {
-        x = _x;
-        n = _n;
+        cout << "here" << endl;
+        _x = x;
+        n = nb;
     }
 
 protected:
@@ -32,7 +33,9 @@ protected:
                 int i = 0;
                 for (int j = 0; j < n; ++j)
                 {
-                    double xVal = getNodeRel(x[i][j]);
+                    double xVal = getNodeRel(_x[i][j]);
+
+                    cout << "x(" << i << "," << j << ") = " << xVal << endl;
                     if (xVal > 0)
                     {
                         cout << "x(" << i << "," << j << ")" << xVal << endl;
@@ -54,7 +57,7 @@ protected:
                     {
                         for (int l : indices)
                         {
-                            tour += x[k][l];
+                            tour += _x[k][l];
                         }
                     }
                     addCut(tour <= taille - 1);
@@ -169,17 +172,18 @@ int main(int argc,
             model.addConstr(flot2 == 1, ss.str());
         }
 
-        // Callback
-        Callback *cb = new Callback(x, n); // passing variable x to the solver callback
-        model.setCallback(cb);             // adding the callback to the model
-
-
         // Optimize model
         // --- Solver configuration ---
         if (verbose)
             cout << "--> Configuring the solver" << endl;
         model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
         model.set(GRB_IntParam_Threads, 1);          //< limits the solver to single thread usage
+
+
+        // Callback
+        Callback* cb = new Callback(x, n); // passing variable x to the solver callback
+        model.setCallback(cb);             // adding the callback to the model
+
 
         //  --- Solver launch ---
         if (verbose)
