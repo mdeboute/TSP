@@ -1,6 +1,7 @@
 #include "gurobi_c++.h"
 #include "parser.hpp"
 #include <stack>
+#include <cstring>
 using namespace std;
 
 class Callback : public GRBCallback

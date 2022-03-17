@@ -1,5 +1,6 @@
 #include "gurobi_c++.h"
 #include "parser.hpp"
+#include <cstring>
 using namespace std;
 
 bool verbose = true;
