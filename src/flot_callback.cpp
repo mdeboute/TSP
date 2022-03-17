@@ -243,8 +243,8 @@ int main(int argc,
         // --- Solver configuration ---
         if (verbose)
             cout << "--> Configuring the solver" << endl;
-        model.set(GRB_DoubleParam_TimeLimit, 600.0); //< sets the time limit (in seconds)
-        model.set(GRB_IntParam_Threads, 3);          //< limits the solver to single thread usage
+        model.set(GRB_DoubleParam_TimeLimit, 60.0); //< sets the time limit (in seconds)
+        model.set(GRB_IntParam_Threads, 3);         //< limits the solver to single thread usage
 
         // Callback
         Callback *cb = new Callback(x, n); // passing variable x to the solver callback
